@@ -238,6 +238,87 @@ def project_yearly_method_c(versions: list[VersionSnapshot], as_of: date) -> flo
     return 12 * _trailing_avg_mrr(versions, as_of, 6)
 
 
+def _trailing_avg_metric(
+    versions: list[VersionSnapshot], as_of: date, n_months: int, use_commission: bool
+) -> float:
+    """Generalised trailing average over n_months for either revenue or commission."""
+    total = 0.0
+    y, m = as_of.year, as_of.month
+    for _ in range(n_months):
+        for v in versions:
+            if _is_active_in_month(v, y, m):
+                total += (
+                    v.monthly_rate_gbp * v.commission_pct
+                    if use_commission
+                    else v.monthly_rate_gbp
+                )
+        if m == 1:
+            y -= 1
+            m = 12
+        else:
+            m -= 1
+    return total / max(n_months, 1)
+
+
+def projection_series(
+    versions: list[VersionSnapshot],
+    from_month: tuple[int, int],
+    to_month: tuple[int, int],
+    use_commission: bool = False,
+) -> list[dict]:
+    """For every month in [from_month, to_month] compute all 3 projections.
+
+    use_commission=False → project MRR (total revenue)
+    use_commission=True  → project commission total (duchy income)
+
+    Returns a list of dicts with keys: Month, Method A, Method B, Method C.
+    """
+    all_months = _month_range(
+        date(from_month[0], from_month[1], 1),
+        date(to_month[0], to_month[1], 1),
+    )
+    result = []
+    for year, month in all_months:
+        as_of = date(year, month, 1)
+        result.append({
+            "Month": f"{year}-{month:02d}",
+            "Method A (12×current)": round(12 * _trailing_avg_metric(versions, as_of, 1, use_commission), 2),
+            "Method B (3-mo avg)":   round(12 * _trailing_avg_metric(versions, as_of, 3, use_commission), 2),
+            "Method C (6-mo avg)":   round(12 * _trailing_avg_metric(versions, as_of, 6, use_commission), 2),
+        })
+    return result
+
+
+def churn_summary_by_coach(
+    versions: list[VersionSnapshot],
+    from_month: tuple[int, int],
+    to_month: tuple[int, int],
+) -> list[dict]:
+    """Per-coach totals of new / dropped / net clients in the date range.
+
+    Returns list of dicts: coach, new_clients, dropped_clients, net, months_in_range.
+    """
+    summaries = aggregate_monthly_summary(versions, from_month, to_month)
+    coaches: dict[str, dict] = {}
+    for s in summaries:
+        if s.coach_name not in coaches:
+            coaches[s.coach_name] = {
+                "Coach": s.coach_name,
+                "New": 0,
+                "Dropped": 0,
+                "Months": 0,
+            }
+        coaches[s.coach_name]["New"] += s.new_clients
+        coaches[s.coach_name]["Dropped"] += s.dropped_clients
+        coaches[s.coach_name]["Months"] += 1
+    result = []
+    for c in coaches.values():
+        c["Net"] = c["New"] - c["Dropped"]
+        c["Avg Monthly Net"] = round(c["Net"] / max(c["Months"], 1), 2)
+        result.append(c)
+    return sorted(result, key=lambda x: x["Coach"])
+
+
 # ---------------------------------------------------------------------------
 # Commissions owed (by coach, by month)
 # ---------------------------------------------------------------------------
