@@ -33,3 +33,19 @@ def get_or_create_coach(session: Session, name: str, date_joined: date | None = 
     if coach is None:
         coach = create_coach(session, name, date_joined or date.today())
     return coach
+
+
+def update_coach(
+    session: Session, coach_id: int, name: str, date_joined: date
+) -> Coach:
+    coach = session.get(Coach, coach_id)
+    if coach is None:
+        raise ValueError(f"Coach id={coach_id} not found.")
+    duplicate = get_coach_by_name(session, name)
+    if duplicate and duplicate.coach_id != coach_id:
+        raise ValueError(f"Another coach named '{name}' already exists.")
+    coach.name = name
+    coach.date_joined = date_joined
+    session.commit()
+    session.refresh(coach)
+    return coach

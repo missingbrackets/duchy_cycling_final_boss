@@ -35,6 +35,24 @@ def audit_create_coach(
     )
 
 
+def audit_update_coach(
+    session: Session,
+    coach_id: int,
+    before: dict,
+    after: dict,
+    user: str = DEFAULT_USER,
+) -> None:
+    log_action(
+        session,
+        user=user,
+        action_type=ActionType.UPDATE_COACH,
+        entity_type=EntityType.COACH,
+        entity_id=str(coach_id),
+        before_json=_to_json(before),
+        after_json=_to_json(after),
+    )
+
+
 def audit_create_client(
     session: Session,
     client_id: int,

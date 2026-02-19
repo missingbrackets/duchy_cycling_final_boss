@@ -45,6 +45,7 @@ SOURCE_OPTIONS: list[str] = [s.value for s in Source]
 
 class ActionType(str, Enum):
     CREATE_CLIENT = "CREATE_CLIENT"
+    UPDATE_COACH = "UPDATE_COACH"
     UPDATE_CLIENT = "UPDATE_CLIENT"
     CANCEL_CLIENT = "CANCEL_CLIENT"
     CREATE_COACH = "CREATE_COACH"
