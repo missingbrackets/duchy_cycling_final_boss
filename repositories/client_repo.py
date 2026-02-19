@@ -73,6 +73,10 @@ def get_active_version(session: Session, client_id: int) -> ClientVersion | None
     """Return the currently open version (effective_to IS NULL) for a client."""
     return (
         session.query(ClientVersion)
+        .options(
+            joinedload(ClientVersion.client),
+            joinedload(ClientVersion.coach),
+        )
         .filter(
             ClientVersion.client_id == client_id,
             ClientVersion.effective_to.is_(None),
@@ -87,6 +91,10 @@ def get_active_version_at(
     """Return the version effective on a specific date."""
     return (
         session.query(ClientVersion)
+        .options(
+            joinedload(ClientVersion.client),
+            joinedload(ClientVersion.coach),
+        )
         .filter(
             ClientVersion.client_id == client_id,
             ClientVersion.effective_from <= as_of,
