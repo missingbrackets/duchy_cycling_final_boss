@@ -1,0 +1,11 @@
+coach,name,source,email,phone,monthly_rate,commission_pct,start_date,end_date
+Alice Trainer,James Whitfield,Google Ad,james.whitfield@email.com,07700900001,250,20%,01/01/2024,
+Alice Trainer,Sophie Mercer,Instagram,sophie.mercer@email.com,07700900002,300,20%,15/01/2024,
+Alice Trainer,Liam Patel,Organic,,07700900003,200,20%,01/02/2024,
+Bob Coach,Emma Hargreaves,Referral,emma.h@email.com,07700900004,280,25%,01/01/2024,
+Bob Coach,Noah Fitzgerald,Strava,noah.fitz@email.com,07700900005,320,25%,01/03/2024,30/09/2024
+Bob Coach,Charlotte Webb,Google Ad,,07700900006,270,25%,01/02/2024,
+Alice Trainer,Oliver Stone,Instagram,oliver.stone@email.com,07700900007,350,20%,01/04/2024,
+Alice Trainer,Amelia Cross,Referral,amelia.cross@email.com,07700900008,200,20%,01/05/2024,
+Bob Coach,Isla Grant,Organic,,07700900009,260,25%,15/03/2024,
+Bob Coach,Harry Mills,Strava,harry.mills@email.com,07700900010,290,25%,01/06/2024,31/10/2024
