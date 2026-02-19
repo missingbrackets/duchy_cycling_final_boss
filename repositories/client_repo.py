@@ -183,6 +183,39 @@ def cancel_client(
     return current
 
 
+# ---------------------------------------------------------------------------
+# Delete operations
+# ---------------------------------------------------------------------------
+
+def delete_client(session: Session, client_id: int) -> str:
+    """Delete a client and all their versions. Returns display_name for audit."""
+    client = session.get(Client, client_id)
+    if client is None:
+        raise ValueError(f"Client id={client_id} not found.")
+    name = client.display_name
+    session.delete(client)
+    return name
+
+
+def delete_clients_by_ids(session: Session, client_ids: list[int]) -> int:
+    """Delete multiple clients by id. Returns count deleted."""
+    count = 0
+    for cid in client_ids:
+        client = session.get(Client, cid)
+        if client:
+            session.delete(client)
+            count += 1
+    return count
+
+
+def delete_all_clients(session: Session) -> int:
+    """Delete every client and all their versions. Returns count deleted."""
+    count = session.query(Client).count()
+    session.query(ClientVersion).delete(synchronize_session=False)
+    session.query(Client).delete(synchronize_session=False)
+    return count
+
+
 def get_all_versions(session: Session) -> list[ClientVersion]:
     return (
         session.query(ClientVersion)

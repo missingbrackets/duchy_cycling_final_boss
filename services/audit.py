@@ -105,6 +105,51 @@ def audit_cancel_client(
     )
 
 
+def audit_delete_clients(
+    session: Session,
+    client_ids: list[int],
+    names: list[str],
+    user: str = DEFAULT_USER,
+) -> None:
+    log_action(
+        session,
+        user=user,
+        action_type=ActionType.DELETE_CLIENT,
+        entity_type=EntityType.CLIENT,
+        notes=f"Deleted {len(client_ids)} client(s): {', '.join(names)}",
+    )
+
+
+def audit_delete_coaches(
+    session: Session,
+    coach_ids: list[int],
+    names: list[str],
+    user: str = DEFAULT_USER,
+) -> None:
+    log_action(
+        session,
+        user=user,
+        action_type=ActionType.DELETE_COACH,
+        entity_type=EntityType.COACH,
+        notes=f"Deleted {len(coach_ids)} coach(es): {', '.join(names)}",
+    )
+
+
+def audit_clear_all(
+    session: Session,
+    clients_deleted: int,
+    coaches_deleted: int,
+    user: str = DEFAULT_USER,
+) -> None:
+    log_action(
+        session,
+        user=user,
+        action_type=ActionType.CLEAR_ALL,
+        entity_type=EntityType.CLIENT,
+        notes=f"CLEAR ALL: {clients_deleted} clients deleted, {coaches_deleted} coaches deleted.",
+    )
+
+
 def audit_import_csv(
     session: Session,
     filename: str,

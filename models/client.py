@@ -21,7 +21,9 @@ class Client(Base):
     )
 
     versions: Mapped[list["ClientVersion"]] = relationship(
-        "ClientVersion", back_populates="client", order_by="ClientVersion.effective_from"
+        "ClientVersion", back_populates="client",
+        order_by="ClientVersion.effective_from",
+        cascade="all, delete-orphan",
     )
 
     def __repr__(self) -> str:

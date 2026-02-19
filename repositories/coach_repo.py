@@ -35,6 +35,45 @@ def get_or_create_coach(session: Session, name: str, date_joined: date | None = 
     return coach
 
 
+def delete_coach(session: Session, coach_id: int) -> str:
+    """Delete a coach. Raises ValueError if they still have client versions."""
+    from models.client import ClientVersion  # avoid circular at module load
+    linked = session.query(ClientVersion).filter(
+        ClientVersion.coach_id == coach_id
+    ).count()
+    if linked > 0:
+        coach = session.get(Coach, coach_id)
+        name = coach.name if coach else str(coach_id)
+        raise ValueError(
+            f"Cannot delete '{name}' — {linked} client version(s) still assigned. "
+            "Reassign or delete those clients first."
+        )
+    coach = session.get(Coach, coach_id)
+    if coach is None:
+        raise ValueError(f"Coach id={coach_id} not found.")
+    name = coach.name
+    session.delete(coach)
+    return name
+
+
+def delete_coaches_by_ids(session: Session, coach_ids: list[int]) -> tuple[int, list[str]]:
+    """Delete multiple coaches. Returns (deleted_count, list_of_error_strings)."""
+    deleted, errors = 0, []
+    for cid in coach_ids:
+        try:
+            delete_coach(session, cid)
+            deleted += 1
+        except ValueError as exc:
+            errors.append(str(exc))
+    return deleted, errors
+
+
+def delete_all_coaches(session: Session) -> tuple[int, list[str]]:
+    """Delete all coaches that have no client versions attached."""
+    coaches = get_all_coaches(session)
+    return delete_coaches_by_ids(session, [c.coach_id for c in coaches])
+
+
 def update_coach(
     session: Session, coach_id: int, name: str, date_joined: date
 ) -> Coach:
